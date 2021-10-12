@@ -1,0 +1,73 @@
+@startuml
+cloud "Internet" {
+    component [internet] as internet
+}
+
+node "Ubuntu router server" {
+
+    package "Network Card One" {
+        component [enp5s0] as External
+        note top of External : external port - dhcp get ip addr
+    }
+
+    package "Network Card Two" {
+        component [enp3s0f0] as clientOne
+        note bottom of clientOne : Internal port
+
+        component [enp3s0f1] as clientTwo
+        note bottom of clientTwo : Internal Port
+
+        component [enp3s0f2] as clientThree
+        note bottom of clientThree : Internal Port
+
+        component [enp3s0f3] as clientFour
+        note bottom of clientFour : Internal Port
+
+        component [br0] as bridge
+        note left of bridge
+            Address: 192.168.1.1
+            Network: 192.168.1.0
+            Netmask: 255.255.255.0
+            Broadcast: 192.168.1.255
+        end note
+
+        clientOne -[hidden]- clientTwo
+        clientTwo -[hidden]- clientThree
+        clientThree -[hidden]- clientFour
+
+        bridge - clientOne
+        bridge - clientTwo
+        bridge - clientThree
+        bridge - clientFour
+
+    }
+    
+}
+
+internet - External
+bridge -up- External
+
+node "Linux Client One" {
+    interface "Net" as ClientOneInterface
+    component [IP Address: 192.168.1.2] as ClientOneIP
+    component [Netmask: 255.255.255.0] as ClientOneMask
+    component [Gateway: 192.168.1.1] as ClientOneGateway
+
+    ClientOneIP -[hidden] ClientOneMask
+    ClientOneMask -[hidden] ClientOneGateway
+
+}
+
+node "Linux Client Two" {
+    interface "Net" as ClientTwoInterface
+    component [IP Address: 192.168.1.3] as ClientTwoIP
+    component [Netmask: 255.255.255.0] as ClientTwoMask
+    component [Gateway: 192.168.1.1] as ClientTwoGateway
+
+    ClientTwoIP -[hidden] ClientTwoMask
+    ClientTwoMask -[hidden] ClientTwoGateway
+
+}
+clientOne - ClientOneInterface
+clientTwo - ClientTwoInterface
+@enduml

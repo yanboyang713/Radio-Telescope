@@ -1,0 +1,64 @@
+@startuml
+
+node "Antanna Rotation System" {
+component [LVB tracker] as tracker
+component [G-5500 controller] as controller
+component [G-5500 rotator] as rotator
+
+tracker -left- controller
+controller -left- rotator
+}
+
+node "Antanna System" {
+    component [Helical antenna] as resonant
+    component [21cm band filter] as filter
+    component [Amplifier] as amplifier
+    resonant - filter
+    filter - amplifier
+}
+
+package "SDR Play" {
+    interface "USB port" as SDRPlayUSB
+    interface "Antanna Port" as AntannaPort
+    component [SDRplay] as SDRplay
+
+    AntannaPort -[hidden]> SDRplay
+    SDRplay -[hidden]> SDRPlayUSB
+}
+
+node "Linux Computer" {
+    component [SoapySDRPlay] as SoapySDRPlay
+    component [SoapySDR] as SoapySDR
+    component [gr-soapy] as grsoapy
+    component [gr-satnogs] as grsatnogs
+    component [SatNOGS-clientID 1354] as 1354
+    component [SatNOGS-clientID 1353] as 1353
+    component [Hamlib rotctl] as hamlib
+
+
+    SoapySDRPlay <--> SoapySDR
+    SoapySDR <--> grsoapy
+    grsoapy <--> grsatnogs
+    
+    
+    hamlib <-right- 1353
+    grsatnogs <-down-> 1353
+    grsatnogs <-down-> 1354
+    1353 -[hidden]> 1354
+}
+
+amplifier - AntannaPort
+SDRPlayUSB <--> SoapySDRPlay
+
+
+
+
+component [SatNOGS Network] as SatNOGS
+SatNOGS -up- 1353
+SatNOGS -up- 1354
+
+
+hamlib -left- tracker
+
+
+@enduml
